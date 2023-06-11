@@ -6,6 +6,7 @@ const port = 6000;
 
 // local database
 const users = [];
+let lastId = 0;
 
 // middlewares
 app.use(bodyParser.json());
@@ -13,8 +14,14 @@ app.use(bodyParser.json());
 //? API to create a user
 app.post('/users', (req, res) => {
     const user = req.body;
+    user.id = ++lastId;
     users.push(user);
     res.status(201).json(user);
+});
+
+//? API to get all users
+app.get('/users', (req, res) => {
+    res.json(users);
 });
 
 //? API to check connection
