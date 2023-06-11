@@ -24,6 +24,13 @@ app.get('/users', (req, res) => {
     res.json(users);
 });
 
+//? API to get only one user
+app.get('/users/:id', (req, res) => {
+    const id = req.params.id;
+    const user = users.find(id, 1);
+    res.send(user);
+});
+
 //? API to check connection
 app.get('/', (req, res) => {
     res.json({ message: `Welcome to our app` });
