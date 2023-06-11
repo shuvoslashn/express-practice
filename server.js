@@ -27,8 +27,13 @@ app.get('/users', (req, res) => {
 //? API to get only one user
 app.get('/users/:id', (req, res) => {
     const id = req.params.id;
-    const user = users.find(id, 1);
-    res.send(user);
+    const user = users.find((u) => u.id === Number(id));
+    // if user not found, user will undifined
+    if (user) {
+        res.json(user);
+    } else {
+        res.status(404).json({ message: `user not found` });
+    }
 });
 
 //? API to check connection
