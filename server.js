@@ -21,12 +21,18 @@ mongoose.connection.on(`error`, (err) => {
 });
 
 //* Mongoose Schema
-const userSchema = new mongoose.Schema({
-    fname: String,
-    lname: String,
-    email: String,
-    age: Number,
-});
+const userSchema = new mongoose.Schema(
+    {
+        fname: String,
+        lname: String,
+        email: String,
+        age: Number,
+    },
+    {
+        // mongoose flag
+        timestamps: true,
+    }
+);
 
 //* Mongoose Model
 const User = mongoose.model('User', userSchema);
@@ -39,11 +45,15 @@ let lastId = 0;
 app.use(bodyParser.json());
 
 //? API to create a user
-app.post('/users', (req, res) => {
-    const user = req.body;
-    user.id = ++lastId;
-    users.push(user);
-    res.status(201).json(user);
+app.post('/users', async (req, res) => {
+    try {
+        const user = new User(req.body);
+        await user.save();
+        res.status(201).json(user);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: `create user error` });
+    }
 });
 
 //? API to get all users
