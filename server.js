@@ -1,9 +1,24 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 6000;
+const uri = process.env.MONGODB_URI;
+
+//* MongoDB Connection
+mongoose
+    .connect(uri, { useNewUrlParser: true })
+    .then(() => console.log(`Connected!`))
+    .catch(() => console.log(`Not connected`));
+
+mongoose.connection.on(`connected`, () => {
+    console.log(`Mongoose default connection open`);
+});
+mongoose.connection.on(`error`, (err) => {
+    console.log(`Mongoose default connection error`);
+});
 
 // local database
 const users = [];
