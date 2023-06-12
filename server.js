@@ -37,10 +37,6 @@ const userSchema = new mongoose.Schema(
 //* Mongoose Model
 const User = mongoose.model('User', userSchema);
 
-// local database
-const users = [];
-let lastId = 0;
-
 // middlewares
 app.use(bodyParser.json());
 
@@ -57,18 +53,30 @@ app.post('/users', async (req, res) => {
 });
 
 //? API to get all users
-app.get('/users', (req, res) => {
-    res.json(users);
+app.get('/users', async (req, res) => {
+    try {
+        const users = await User.find({});
+        res.json(users);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: `all users data fatching error`,
+        });
+    }
 });
 
 //? API to get only one user
-app.get('/users/:id', (req, res) => {
-    const user = getUserById(req);
-    // if user not found, user will undifined
-    if (user) {
-        res.json(user);
-    } else {
-        res.status(404).json({ message: `user not found` });
+app.get('/users/:id', async (req, res) => {
+    try {
+        const user = await getUserById(req);
+        if (user) {
+            res.json(user);
+        } else {
+            res.status(404).json({ message: `user not found` });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: `user data fatching error` });
     }
 });
 
@@ -108,8 +116,8 @@ app.listen(port, () => {
     console.log(`Server running on ${port}`);
 });
 
-const getUserById = (req) => {
-    const id = Number(req.params.id);
-    const user = users.find((u) => u.id === id);
+const getUserById = async (req) => {
+    const id = req.params.id;
+    const user = await User.findById(id);
     return user;
 };
