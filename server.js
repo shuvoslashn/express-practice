@@ -68,7 +68,8 @@ app.get('/users', async (req, res) => {
 //? API to get only one user
 app.get('/users/:id', async (req, res) => {
     try {
-        const user = await getUserById(req);
+        const id = req.params.id;
+        const user = await User.findById(id);
         if (user) {
             res.json(user);
         } else {
@@ -81,16 +82,22 @@ app.get('/users/:id', async (req, res) => {
 });
 
 //? API to update single user
-app.put('/users/:id', (req, res) => {
-    const user = getUserById(req);
-    const body = req.body;
-    // if user not found, user will undifined
-    if (user) {
-        user.fname = body.fname;
-        user.lname = body.lname;
-        res.json(user);
-    } else {
-        res.status(404).json({ message: `user not found` });
+app.put('/users/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const body = req.body;
+        const user = await User.findByIdAndUpdate(id, body);
+        // if user not found, user will undifined
+        if (user) {
+            user.fname = body.fname;
+            user.lname = body.lname;
+            res.json(user);
+        } else {
+            res.status(404).json({ message: `user not found` });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: `user data updating error` });
     }
 });
 
@@ -115,9 +122,3 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running on ${port}`);
 });
-
-const getUserById = async (req) => {
-    const id = req.params.id;
-    const user = await User.findById(id);
-    return user;
-};
