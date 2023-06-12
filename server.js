@@ -51,6 +51,18 @@ app.put('/users/:id', (req, res) => {
     }
 });
 
+//? API to delete an user
+app.delete('/users/:id', (req, res) => {
+    const id = req.params.id;
+    const userIndex = users.findIndex((u) => u.id === Number(id));
+    if (userIndex === -1) {
+        res.status(404).json({ message: `user not found` });
+    } else {
+        users.splice(userIndex, 1);
+        res.json({ message: `${userIndex + 1} no. user deleted` });
+    }
+});
+
 //? API to check connection
 app.get('/', (req, res) => {
     res.json({ message: `Welcome to our app` });
