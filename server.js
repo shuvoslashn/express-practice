@@ -20,6 +20,17 @@ mongoose.connection.on(`error`, (err) => {
     console.log(`Mongoose default connection error`);
 });
 
+//* Mongoose Schema
+const userSchema = new mongoose.Schema({
+    fname: String,
+    lname: String,
+    email: String,
+    age: Number,
+});
+
+//* Mongoose Model
+const User = mongoose.model('User', userSchema);
+
 // local database
 const users = [];
 let lastId = 0;
