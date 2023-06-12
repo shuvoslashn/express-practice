@@ -102,14 +102,18 @@ app.put('/users/:id', async (req, res) => {
 });
 
 //? API to delete an user
-app.delete('/users/:id', (req, res) => {
-    const id = req.params.id;
-    const userIndex = users.findIndex((u) => u.id === Number(id));
-    if (userIndex === -1) {
-        res.status(404).json({ message: `user not found` });
-    } else {
-        users.splice(userIndex, 1);
-        res.json({ message: `${userIndex + 1} no. user deleted` });
+app.delete('/users/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const user = await User.findByIdAndDelete(id);
+        if (user) {
+            res.json(user);
+        } else {
+            res.status(404).json({ message: `user not found` });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: `user data deleting error` });
     }
 });
 
