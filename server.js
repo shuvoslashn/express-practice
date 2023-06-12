@@ -1,8 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+require('dotenv').config();
 
 const app = express();
-const port = 6000;
+const port = process.env.PORT || 6000;
 
 // local database
 const users = [];
