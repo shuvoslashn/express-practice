@@ -20,60 +20,100 @@ mongoose.connection.on(`error`, (err) => {
     console.log(`Mongoose default connection error`);
 });
 
-// local database
-const users = [];
-let lastId = 0;
+//* Mongoose Schema
+const userSchema = new mongoose.Schema(
+    {
+        fname: String,
+        lname: String,
+        email: String,
+        age: Number,
+    },
+    {
+        // mongoose flag
+        timestamps: true,
+    }
+);
+
+//* Mongoose Model
+const User = mongoose.model('User', userSchema);
 
 // middlewares
 app.use(bodyParser.json());
 
 //? API to create a user
-app.post('/users', (req, res) => {
-    const user = req.body;
-    user.id = ++lastId;
-    users.push(user);
-    res.status(201).json(user);
+app.post('/users', async (req, res) => {
+    try {
+        const user = new User(req.body);
+        await user.save();
+        res.status(201).json(user);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: `create user error` });
+    }
 });
 
 //? API to get all users
-app.get('/users', (req, res) => {
-    res.json(users);
+app.get('/users', async (req, res) => {
+    try {
+        const users = await User.find({});
+        res.json(users);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: `all users data fatching error`,
+        });
+    }
 });
 
 //? API to get only one user
-app.get('/users/:id', (req, res) => {
-    const user = getUserById(req);
-    // if user not found, user will undifined
-    if (user) {
-        res.json(user);
-    } else {
-        res.status(404).json({ message: `user not found` });
+app.get('/users/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const user = await User.findById(id);
+        if (user) {
+            res.json(user);
+        } else {
+            res.status(404).json({ message: `user not found` });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: `user data fatching error` });
     }
 });
 
 //? API to update single user
-app.put('/users/:id', (req, res) => {
-    const user = getUserById(req);
-    const body = req.body;
-    // if user not found, user will undifined
-    if (user) {
-        user.fname = body.fname;
-        user.lname = body.lname;
-        res.json(user);
-    } else {
-        res.status(404).json({ message: `user not found` });
+app.put('/users/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const body = req.body;
+        const user = await User.findByIdAndUpdate(id, body, { new: true });
+        // if user not found, user will undifined
+        if (user) {
+            user.fname = body.fname;
+            user.lname = body.lname;
+            res.json(user);
+        } else {
+            res.status(404).json({ message: `user not found` });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: `user data updating error` });
     }
 });
 
 //? API to delete an user
-app.delete('/users/:id', (req, res) => {
-    const id = req.params.id;
-    const userIndex = users.findIndex((u) => u.id === Number(id));
-    if (userIndex === -1) {
-        res.status(404).json({ message: `user not found` });
-    } else {
-        users.splice(userIndex, 1);
-        res.json({ message: `${userIndex + 1} no. user deleted` });
+app.delete('/users/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const user = await User.findByIdAndDelete(id);
+        if (user) {
+            res.json(user);
+        } else {
+            res.status(404).json({ message: `user not found` });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: `user data deleting error` });
     }
 });
 
@@ -86,9 +126,3 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running on ${port}`);
 });
-
-const getUserById = (req) => {
-    const id = Number(req.params.id);
-    const user = users.find((u) => u.id === id);
-    return user;
-};
