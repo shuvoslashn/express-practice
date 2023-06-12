@@ -26,8 +26,7 @@ app.get('/users', (req, res) => {
 
 //? API to get only one user
 app.get('/users/:id', (req, res) => {
-    const id = req.params.id;
-    const user = users.find((u) => u.id === Number(id));
+    const user = getUserById(req);
     // if user not found, user will undifined
     if (user) {
         res.json(user);
@@ -38,8 +37,7 @@ app.get('/users/:id', (req, res) => {
 
 //? API to update single user
 app.put('/users/:id', (req, res) => {
-    const id = req.params.id;
-    const user = users.find((u) => u.id === Number(id));
+    const user = getUserById(req);
     const body = req.body;
     // if user not found, user will undifined
     if (user) {
@@ -72,3 +70,9 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running on ${port}`);
 });
+
+const getUserById = (req) => {
+    const id = Number(req.params.id);
+    const user = users.find((u) => u.id === id);
+    return user;
+};
