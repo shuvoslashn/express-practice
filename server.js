@@ -87,7 +87,6 @@ app.put('/users/:id', async (req, res) => {
         const id = req.params.id;
         const body = req.body;
         const user = await User.findByIdAndUpdate(id, body, { new: true });
-        // if user not found, user will undifined
         if (user) {
             user.fname = body.fname;
             user.lname = body.lname;
