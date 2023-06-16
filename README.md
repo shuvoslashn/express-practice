@@ -60,11 +60,12 @@ app.get('/users', async (req, res) => {
     } catch (error) {
         console.log(error);
         res.status(500).json({
-            message: `all users data fatching error`,
+            message: `all users data fetching error`,
         });
     }
 });
 ```
+<br>
 
 ## API to get only one user
 ```bash
@@ -83,6 +84,7 @@ app.get('/users/:id', async (req, res) => {
     }
 });
 ```
+<br>
 
 ## API to update single user
 ```bash
@@ -104,6 +106,7 @@ app.put('/users/:id', async (req, res) => {
     }
 });
 ```
+<br>
 
 ## API to delete an user
 ```bash
@@ -122,6 +125,7 @@ app.delete('/users/:id', async (req, res) => {
     }
 });
 ```
+<br>
 
 ## API to check connection
 ```bash
