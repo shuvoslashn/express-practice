@@ -81,7 +81,7 @@ app.post('/users/login', async (req, res) => {
             } else {
                 const token = jwt.sign(
                     { email: user.email, id: user.id },
-                    'secret'
+                    process.env.JWT_SECRET
                 );
                 const userObj = user.toJSON();
                 userObj['accessToken'] = token;
@@ -92,6 +92,42 @@ app.post('/users/login', async (req, res) => {
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: `Login Failed` });
+    }
+});
+
+//* Middleware to authenticate JWT access tokens
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) {
+        res.status(401).json({ message: 'Unauthorized' });
+        return;
+    } else {
+        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+            if (err) {
+                res.status(401).json({ message: 'Unauthorized' });
+                console.log(err);
+            } else {
+                req.user = user;
+                next();
+            }
+        });
+    }
+};
+
+//* User profile api
+app.get('/profile', authenticateToken, async (req, res) => {
+    try {
+        const id = req.user.id;
+        const user = await User.findById(id);
+        if (user) {
+            res.json(user);
+        } else {
+            res.status(404).json({ message: `user not found` });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: `user data fatching error` });
     }
 });
 
@@ -109,7 +145,7 @@ app.get('/users', async (req, res) => {
 });
 
 //? API to get only one user
-app.get('/users/:id', async (req, res) => {
+app.get('/users/:id', authenticateToken, async (req, res) => {
     try {
         const id = req.params.id;
         const user = await User.findById(id);
