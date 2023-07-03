@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 const app = express();
@@ -10,14 +11,14 @@ const uri = process.env.MONGODB_URI;
 //* MongoDB Connection
 mongoose
     .connect(uri, { useNewUrlParser: true })
-    .then(() => console.log(`Connected!`))
-    .catch(() => console.log(`Not connected`));
+    .then(() => console.log(`Database Connected!`))
+    .catch(() => console.log(`Database Not connected`));
 
 mongoose.connection.on(`connected`, () => {
-    console.log(`Mongoose default connection open`);
+    console.log(`Mongoose default connection open.`);
 });
 mongoose.connection.on(`error`, (err) => {
-    console.log(`Mongoose default connection error`);
+    console.log(`Mongoose default connection error.`);
 });
 
 //* Mongoose Schema
@@ -27,6 +28,7 @@ const userSchema = new mongoose.Schema(
         lname: String,
         email: String,
         age: Number,
+        password: String,
     },
     {
         // mongoose flag
@@ -43,7 +45,16 @@ app.use(bodyParser.json());
 //? API to create a user
 app.post('/users', async (req, res) => {
     try {
-        const user = new User(req.body);
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(req.body.password, salt);
+        const userObj = {
+            fname: req.body.fname,
+            lname: req.body.lname,
+            email: req.body.email,
+            age: req.body.age,
+            password: hashedPassword,
+        };
+        const user = new User(userObj);
         await user.save();
         res.status(201).json(user);
     } catch (error) {
